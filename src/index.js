@@ -11,11 +11,9 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use("/auth", require("./routes/auth"));
+app.use("/message",require('./routes/message'))
 app.get("/", (req, res) => {
   res.send(`<h1>Hello from express</h1>`);
-});
-app.get("/hello", (req, res) => {
-  res.send(`Hello World!`);
 });
 app.post("/webhook", async (req, res) => {
   console.log(req.body);
@@ -28,6 +26,7 @@ app.post("/webhook", async (req, res) => {
   }))
   res.sendStatus(200)
 });
+app.use(require("./middlewares/errorHandler"))
 
 const BACKEND_PORT = process.env.BACKEND_PORT || 3001;
 // const key = fs.readFileSync("localhost-key.pem", "utf-8");
