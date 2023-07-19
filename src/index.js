@@ -1,18 +1,41 @@
-const dotenv = require('dotenv')
-const express = require('express');
-const cookieParser = require('cookie-parser');
+const dotenv = require("dotenv");
+const express = require("express");
+// const https = require("https");
+// const fs = require("fs");
+const cookieParser = require("cookie-parser");
+const { messageHandle } = require("./functions/messageHandler");
 
-dotenv.config({ path: '.env' });
+dotenv.config({ path: ".env" });
+
 const app = express();
-
-app.use(express.json())
+app.use(express.json());
 app.use(cookieParser());
-app.get('/', (req, res) => {
-    res.send(`<h1>Hello from express</h1>`);
+app.use("/auth", require("./routes/auth"));
+app.get("/", (req, res) => {
+  res.send(`<h1>Hello from express</h1>`);
 });
-app.get('/hello', (req, res) => {
+app.get("/hello", (req, res) => {
   res.send(`Hello World!`);
 });
+app.post("/webhook", async (req, res) => {
+  console.log(req.body);
+  await Promise.all( req.body.events.map(async (event)=>{
+    if (event.type === "message") {
+      return await messageHandle(event)
+    }else{
+      return;
+    }
+  }))
+  res.sendStatus(200)
+});
 
-const BACKEND_PORT = process.env.BACKEND_PORT || 3000;
-const server = app.listen(BACKEND_PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${BACKEND_PORT}`))
+const BACKEND_PORT = process.env.BACKEND_PORT || 3001;
+// const key = fs.readFileSync("localhost-key.pem", "utf-8");
+// const cert = fs.readFileSync("localhost.pem", "utf-8");
+// https.createServer({ key, cert }, app).listen(BACKEND_PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${BACKEND_PORT}`));
+const server = app.listen(
+  BACKEND_PORT,
+  console.log(
+    `Server running in ${process.env.NODE_ENV} mode on port ${BACKEND_PORT}`
+  )
+);

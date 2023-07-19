@@ -6,9 +6,11 @@
   "author": "Mahasamut Ngeontaweekoon",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.4.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "node-jose": "^2.2.0"
   },
   "scripts": {
     "start": "nodemon src/index.js"
