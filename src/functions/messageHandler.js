@@ -21,8 +21,7 @@ module.exports.pushMessages = async(recipientId, messages, notificationDisabled=
   if(!validateMessages(messages)){
     throw new BadRequestError("Message(s) is not in a correct format.","pushMessages")
   }else{
-    const {response} = await axios.post(LINE_API["push"],
-    {
+    return await invokeLineApi('post','push',{
       "to":recipientId,
       "messages": messages,
       'notificationDisabled': notificationDisabled
@@ -33,7 +32,6 @@ module.exports.pushMessages = async(recipientId, messages, notificationDisabled=
       'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`,
       }
     })
-    return response
   }
 }
 
@@ -41,8 +39,7 @@ module.exports.multicastMessages = async(recipientIdArray, messages, notificatio
   if(!validateMessages(messages)){
     throw new BadRequestError("Message(s) is not in a correct format.","multicastMessages")
   }else{
-    const {response} = await axios.post(LINE_API["multicast"],
-    {
+    return await invokeLineApi('post','multicast',{
       "to":recipientIdArray,
       "messages": messages,
       'notificationDisabled': notificationDisabled
@@ -53,40 +50,38 @@ module.exports.multicastMessages = async(recipientIdArray, messages, notificatio
       'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`,
       }
     })
-    return response
   }
 }
 
 module.exports.broadcastMessages = async(messages, notificationDisabled=false)=>{
   if(!validateMessages(messages)){
-    throw new BadRequestError("Message(s) is not in a correct format.","multicastMessages")
+    throw new BadRequestError("Message(s) is not in a correct format.","broadcastMessages")
   }else{
-    const {response} = await axios.post(LINE_API["broadcast"],
-    {
+    return await invokeLineApi('post','broadcast',{
       "messages": messages,
       'notificationDisabled': notificationDisabled
-    },
-    {
+    },{
       headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`,
       }
     })
-    return response
   }
 }
 
-// const invokeLineApi = async (type,service,body,headers)=>{
-//   try{
-//     if(type==='POST'){
-//       await axios.post(LINE_API[service],body,headers)
-//     }else if(type==='GET'){
-//       await axios.post(LINE_API[service],body,headers)
-//     }
-//   }catch(err){
-//     throw err
-//   }
-// }
+const invokeLineApi = async (type,service,body,headers)=>{
+  try{
+    let result;
+    if(type==='post'){
+      result = (await axios.post(LINE_API[service],body,headers)).response
+    }else if(type==='get'){
+      result = (await axios.post(LINE_API[service],body,headers)).response
+    }
+    return result??{message: "success"}
+  }catch(err){
+    throw err
+  }
+}
 
 const replyMessages = async (replyToken, messages, notificationDisabled=false)=>{
   // messages: [{"type":"text", "text":"Hello, user"},]
